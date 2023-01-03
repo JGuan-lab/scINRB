@@ -34,3 +34,4 @@ Therefore, we use the information of batch RNA-seq data, use network regularized
     result <- scINRB(data,data_bulk,parameter,r)
     write.csv(result[[3]], file="scINRB_matrix.csv")
 
+ 
