@@ -1,8 +1,3 @@
-# This is the main R file to generate the results related our manuscript
-# figure 2 and the supplementary figures related to figure 2.
-# Please contact Tao Peng: pengt@email.chop.edu if you have any questions 
-# about the scripts or data
-
 # load the libraries library(SAVER)
 library(scRecover)
 library(SAVERX)
@@ -40,7 +35,7 @@ for(change_rate in c(20,30,40,50,60) ){
   
 }
 
-for(change_rate in c(0) ){
+for(change_rate in c(20,30,40,50,60) ){
   
   for(scale_num in c(1:5)){
     
@@ -50,7 +45,7 @@ for(change_rate in c(0) ){
   
 }
 
-for(change_rate in c(1:4) ){
+for(change_rate in c(20,30,40,50,60) ){
   
   for(scale_num in c(1:5)){
     
@@ -61,7 +56,7 @@ for(change_rate in c(1:4) ){
 }
 
 
-for(change_rate in c(0) ){
+for(change_rate in c(20,30,40,50,60) ){
   
   for(scale_num in c(1:5)){
     
@@ -81,7 +76,7 @@ for(change_rate in c(20,30,40,50,60) ){
   
 }
 
-for(change_rate in c(3:4) ){
+for(change_rate in c(20,30,40,50,60) ){
   
   for(scale_num in c(1:5)){
     
