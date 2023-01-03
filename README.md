@@ -7,7 +7,7 @@ For many scRNA-seq data, existing batch data usually exists on the same cell or 
 
 Therefore, we use the information of batch RNA-seq data, use network regularized non-negative matrix decomposition to decompose the transcriptional count matrix into two low-dimensional matrices, and propose an interpolation method scINRB to correct the measurement of gene expression in scRNA-seq.
 
-The datasets analyzed in the paper are available at: https://doi.org/10.5281/zenodo.7500879
+The datasets analyzed in the paper are available at: https://doi.org/10.5281/zenodo.7501990
 
 ## Running the tests
 
