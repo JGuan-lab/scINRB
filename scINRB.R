@@ -20,7 +20,7 @@
 #' r <- 200
 #' 
 #' # Run scINRB
-#' result <- scINRB(data_dropout,data_bulk,parameter)
+#' result <- scINRB(data_dropout,data_bulk,parameter,r)
 #'
 #' @return A data matrix with the same size of the input scRNAseq data
 #'
