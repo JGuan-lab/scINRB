@@ -11,17 +11,21 @@ Therefore, we use the information of batch RNA-seq data, use network regularized
 
 ### Depends:
     R (>= 4.0.4) 
-### The parameter used in scINRB:
+### Input data:
     data : the input dropout scRNAseq data.
-    
-    data_bulk : the bulk RNAseq.
 
+    data_bulk : the bulk RNAseq.
+### The parameter used in scINRB:
+
+    #Parameters and r can be selected by cross-validation in the article.
+    
     parameter : the vector of parameters , the default is (0.001,0.001,1).
     The first parameter is the value of alpha1 in the mathematical model;
     the second one is the value of alpha2 in the mathematical model;
     the third one is the value of alpha3 in the mathematical model.
     
-    r : dimensions of matrix decomposition , the default is 200.  
+    r : dimensions of matrix decomposition , the default is 200. 
+    
 ### Example:
     #run_demo.R
     setwd(path)
