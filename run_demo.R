@@ -17,5 +17,5 @@ source('functions.R')#“预装“函数
 library(MASS)
 r<-200
 parameter <- c(0.001,0.001,1)
-result <- FPimpute(data_sc,data_bulk,parameter,r)
+result <- scINRB(data_sc,data_bulk,parameter,r)
 write.csv(result[[3]], file="scINRB_matrix.csv")
