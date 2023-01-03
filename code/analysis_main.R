@@ -11,16 +11,16 @@ library(lattice)
 library(aplot)
 library(tidyr)
 library(Metrics)
-path="/Users/kangkangyue/Desktop/scINRB" #声明test2.R所在位置
-setwd(path)  #把工作路径设置到path
-source('functions.R')#“预装“函数
+path="/Users/kangkangyue/Desktop/scINRB" 
+setwd(path)  
+source('functions.R')
 source('analysis_plot_methods.R')
 
 # gene-gene correlation&cell-cell correlation
 pss_c<-list()
 pss_g<-list()
 
-for(scale_num in c(3)){
+for(scale_num in c(1:5)){
 
   k=0
   for(change_rate in c(20,30,40,50,60)){
@@ -31,8 +31,7 @@ for(scale_num in c(3)){
 
     data_gene = data_cor[[2]]
 
-    #相关矩阵转向量
-    #as.vector(unlist(x))  矩阵转向量
+
     c_true<- as.vector(unlist(data_cell[[1]]))
     c_dropout <- as.vector(unlist(data_cell[[2]]))
     c_FPimpute <- as.vector(unlist(data_cell[[3]]))
@@ -59,7 +58,9 @@ for(scale_num in c(3)){
 
     
     name<-list('true','dropout','FPimpute','drimpute','scimpute','scrabble','viper','SAVER','magic','CMF')
-    #计算相关矩阵的Pearson相似度
+    
+    #Calculate the Pearson similarity of correlation matrices
+    
     cell_pss <- vector()
     cell_pss[1]<-cor(c_true,c_dropout)
     cell_pss[2]<-cor(c_true,c_FPimpute)
@@ -87,22 +88,22 @@ for(scale_num in c(3)){
     pss_g[[k]]<-gene_pss
 
   }
-  print('数据')
+
   print(seed_value)
-  print('cell pearson')
+
   print(pss_c)
-  print('gene pearson')
+
   print(pss_g)
-  print('___________')
+
   
 }
 
 
 
-#Imputded data and true data 矩阵相似性
+#Matrix similarity between imputded data and true data 
 
 
-for(scale_num in c(3)){
+for(scale_num in c(1:5)){
   cor_imputed_data<-vector()
   cor_imputed_data_all <-list()
   k=0
@@ -115,16 +116,16 @@ for(scale_num in c(3)){
     
   }
 
-  print('数据')
+
   print(seed_value)
-  print('impution data pearson')
+
   print(cor_imputed_data_all)
-  print('___________')
+
 
 }
 
 #Imputded data and true data RMSE
-for(scale_num in c(3)){
+for(scale_num in c(1:5)){
   k=0
   RMSE_imputed_data_all <-list()
   for(change_rate in c(20,30,40,50,60)){
@@ -133,11 +134,11 @@ for(scale_num in c(3)){
     RMSE_imputed_data_all[[k]] <-RMSE_imputed_data
     
   }
-  print('数据')
+
   print(scale_num)
-  print('impution data pearson')
+
   print(RMSE_imputed_data_all)
-  print('___________')
+
   
 
   
