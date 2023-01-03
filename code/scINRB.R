@@ -92,8 +92,8 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   #circulate
   while((k < nIter) & (error > error_threshold))
   {
-    print(paste0('The counts is'))
-    print(k)
+    #print(paste0('The counts is'))
+    #print(k)
     data=as.matrix(data)
     t1=2*W%*%t(H)%*%t(a)%*%a%*%H-2*t(data_bulk)%*%a%*%H
     l1=(-2)*data%*%H+2*W%*%t(H)%*%H-2*lambda1*sg%*%W+lambda3*t1-P
@@ -112,30 +112,30 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
     
     #bc<-0.98*bc
 
-    print(paste0('W H is renewed'))
+    #print(paste0('W H is renewed'))
     list <- list(W,H,W%*%t(H))
 
     #______________
     #compute object function
     x1=data-(W%*%t(H))
     b1=norm(x1,type = "F")^2
-    print(b1)
+    #print(b1)
     
     x2=sum(diag(t(W)%*%sg%*%W))
     b2=lambda1*x2
-    print(b2)
+    #print(b2)
     
     x3=sum(diag(t(H)%*%sc%*%H))
     b3=lambda2*x3
-    print(b3)
+    #print(b3)
     
     x4=(a%*%H%*%t(W))-data_bulk
     b4=lambda3*(norm(x4,type = "2")^2)
-    print(b4)
+    #print(b4)
     
     l= b1+b2+b3+b4
     print(paste0('L='))
-    print(l)
+    #print(l)
     
     
     #__________________________
@@ -148,14 +148,14 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
     {
       flag <- -1#decrease
     }
-    print(paste0('error is'))
+    #print(paste0('error is'))
     
     
     c1=norm(X0-list[[3]],type = "F")
     c2=norm(X0,type = "F")
     error <- c1/c2
-    print(error)
-    print(flag)
+    #print(error)
+    #print(flag)
     
     k<-k+1
     l0=b1+b2+b3+b4
