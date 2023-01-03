@@ -139,6 +139,8 @@ for(scale_num in c(1:5)){
   
   for(change_rate in c(20,30,40,50,60)){
     
+    result <- get_cor_result(methond,change_rate, scale_num)
+    
     # result[[1]] = RMSE
     # 
     # result[[2]] = matrix_pss
