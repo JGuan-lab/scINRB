@@ -1,5 +1,5 @@
 get_cor_data <- function(change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 )  
 
   
   
@@ -12,7 +12,7 @@ get_cor_data <- function(change_rate, scale_num){
   )
   
   
-  index = rowMeans(data_simulation$data_dropout) > 0 #每行的均值>0
+  index = rowMeans(data_simulation$data_dropout) > 0 
   
   data_true = data_simulation$data_true
   
@@ -116,7 +116,7 @@ get_cor_data <- function(change_rate, scale_num){
   
   
   # load the magic results 
-  #data = read.delim("~/Desktop/论文/kangyue/LPLS9.28/imputation_magic_changerate_data/magic_3_20%.rds", header=FALSE,row.names=1)
+  #data = read.delim("~/Desktop/论文/kangyue/LPLS9.28/imputation_magic_data/magic_3_20%.rds", header=FALSE,row.names=1)
   data = read.delim(paste0("imputation_magic_data/magic_",scale_num,"_",change_rate,"%.rds"),
                     header = FALSE,row.names = 1,
                     sep = "\t")
@@ -297,7 +297,7 @@ get_cor_data <- function(change_rate, scale_num){
 
 
 get_cor_imputed_data <- function(change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('simulation_data/',
@@ -436,7 +436,7 @@ get_cor_imputed_data <- function(change_rate, scale_num){
 
 
 get_RMSE_imputed_data <- function(change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('data/simulation_data/',
@@ -480,7 +480,6 @@ get_RMSE_imputed_data <- function(change_rate, scale_num){
   
   
   # load the magic results 
-  #data = read.delim("~/Desktop/论文/kangyue/LPLS9.28/imputation_magic_changerate_data/magic_3_20%.rds", header=FALSE,row.names=1)
   data = read.delim(paste0("imputation_magic_data/magic_",scale_num,"_",change_rate,"%.rds"),
                     header = FALSE,row.names = 1,
                     sep = "\t")
@@ -630,7 +629,7 @@ cluster_evalu<-function(H,cluster,realcluster){
 
 
 get_simulation_data <- function(change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('data/simulation_data/',
@@ -681,7 +680,7 @@ get_simulation_data <- function(change_rate, scale_num){
   
   
   # load the magic results 
-  #data = read.delim("~/Desktop/论文/kangyue/LPLS9.28/imputation_magic_changerate_data/magic_3_20%.rds", header=FALSE,row.names=1)
+  
   data = read.delim(paste0("imputation_magic_data/magic_",scale_num,"_",change_rate,"%.rds"),
                     header = FALSE,row.names = 1,
                     sep = "\t")
@@ -790,7 +789,7 @@ get_simulation_data <- function(change_rate, scale_num){
 
 
 tsen_plot <- function(data,realcluster){
-  options( warn = -1 ) #这个命令，可以忽视任何警告 
+  options( warn = -1 ) 
   name_list <- list()
   name_list[[1]] <- "true data"
   name_list[[2]] <- "dropout data"
@@ -816,8 +815,8 @@ tsen_plot <- function(data,realcluster){
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5),
             panel.grid.major=element_line(colour=NA),
-            panel.grid.minor = element_blank(),#以上theme中代码用于去除网格线且保留坐标轴边框
-            axis.title =  element_text(size=10,face = "bold"),#设置标题字体大小
+            panel.grid.minor = element_blank(),
+            axis.title =  element_text(size=10,face = "bold"),
       ) +
       labs(title = name_list[[k]],color="Species")
     
@@ -850,7 +849,7 @@ tsen_plot <- function(data,realcluster){
 
 
 get_simulation_data1 <- function(methond,change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('data/simulation_data/',
@@ -908,9 +907,9 @@ get_simulation_data1 <- function(methond,change_rate, scale_num){
 }
 
 
-########批量模拟数据tsne聚类 单个方法
+########simulation data tsne clustering 
 tsne_simulation_data <- function(methond,change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('data/simulation_data/',
@@ -970,10 +969,10 @@ tsne_simulation_data <- function(methond,change_rate, scale_num){
   
 }
 
-########批量模拟数据pss 单个方法
+########simulation data matrix pss/RMSE,gene pss/cell pss.
 
 get_cor_result <- function(methond,change_rate, scale_num){
-  options( warn = -1 ) #这个命令，可以忽视任何警告  
+  options( warn = -1 ) 
   
   # load the simulationd data
   data_simulation <- readRDS(file = paste0('data/simulation_data/',
@@ -984,7 +983,7 @@ get_cor_result <- function(methond,change_rate, scale_num){
   )
   
   
-  index = rowMeans(data_simulation$data_dropout) > 0 #每行的均值>0
+  index = rowMeans(data_simulation$data_dropout) > 0 
   
   data_true = data_simulation$data_true
   
