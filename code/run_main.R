@@ -6,11 +6,11 @@ library(scImpute)
 library(SCRABBLE)
 library(DrImpute)
 library(viper)
-path="/Users/kangkangyue/Desktop/scINRB" #声明test2.R所在位置
-setwd(path)  #把工作路径设置到path
+path="/Users/kangkangyue/Desktop/scINRB" 
+setwd(path)  
 source("run_library.R")
-source('scINRB.R')#“预装“函数
-source('functions.R')#“预装“函数
+source('scINRB.R')
+source('functions.R')
 
 
 # data in the current folder /simulation_data/
