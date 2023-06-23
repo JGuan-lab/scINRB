@@ -3,9 +3,7 @@
 
 ## Introduction
 
-For many scRNA-seq data, existing batch data usually exists on the same cell or tissue. Compared with using single-cell data alone, batch RNA-seq data can more accurately estimate the distribution of gene expression between cells. 
-
-Therefore, we use the information of batch RNA-seq data, use network regularized non-negative matrix decomposition to decompose the transcriptional count matrix into two low-dimensional matrices, and propose an interpolation method scINRB to correct the measurement of gene expression in scRNA-seq.
+scINRB, a single-cell gene expression imputation method with network regularization and bulk RNA-seq data, adopts network-regularized non-negative matrix factorization to decompose single-cell gene expression matrix into low-dimensional gene-factor and sample-factor matrices, ensuring that the imputed data maintains the original cell-cell and gene-gene similarities and approaches the gene average expression calculated from bulk RNA-seq data.
 
 The datasets analyzed in the paper are available at: https://doi.org/10.5281/zenodo.7501990
 
@@ -14,19 +12,15 @@ The datasets analyzed in the paper are available at: https://doi.org/10.5281/zen
 ### Depends:
     R (>= 4.0.4) 
 ### Input data:
-    data : the input dropout scRNAseq data.
+    data: the input dropout scRNA-seq data.
 
-    data_bulk : the bulk RNAseq.
-### The parameter used in scINRB:
+    data_bulk: the bulk RNA-seq data.
+### The parameters used in scINRB:
 
-    #Parameters and r can be selected by cross-validation in the article.
+    #Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
     
-    parameter : the vector of parameters , the default is (0.001,0.001,1).
-    The first parameter is the value of alpha1 in the mathematical model;
-    the second one is the value of alpha2 in the mathematical model;
-    the third one is the value of alpha3 in the mathematical model.
-    
-    r : dimensions of matrix decomposition , the default is 200. 
+    parameter: the vector of regularization parameters, the default is (0.001,0.001,1).    
+    r: dimensions of low-dimensional matrix, the default is 200. 
     
 ### Example:
     #run_demo.R
