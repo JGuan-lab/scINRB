@@ -27,7 +27,11 @@
 #' @rdname scINRB
 #'
 #' @export
-#'bc = 1e-7
+#' 
+bc = 1e-7
+nIter = 2000
+error_threshold = 1e-05
+
 scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_threshold = 1e-05)
 {
   time1<-Sys.time()
@@ -39,7 +43,6 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   K <- matrix(data=NA, nrow = m, ncol = n)
   row_sum<-rowSums(data)
 
-  #__________
   #compute sg
   ag=SM(data)
   Ag = ag - diag(m)
@@ -48,7 +51,6 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   sg = diag(m) - solve(sqrt(Dg)) %*% Ag %*% solve(sqrt(Dg))
   print(paste0('sg is finished'))
   
-  #__________
   #compute sc
   ac=SM(t(data))#similarity
   Ac = ac - diag(n)#adjacency matrix
@@ -57,8 +59,6 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   sc = diag(n) - solve(sqrt(Dc)) %*% Ac %*% solve(sqrt(Dc))
   print(paste0('sc is finished'))
   
-  
-  #___________________
   #initialize H and W
   set.seed(1)
   x1 <- runif(m*r,min=0,max=1)
@@ -67,7 +67,6 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   x2 <- runif(n*r,min=0,max=1)
   H <- matrix(x2,nrow=n,ncol=r)
   
-  #___________________
   #initialize P and Q
   set.seed(3)
   x1 <- runif(m*r,min=0,max=1)
@@ -76,7 +75,6 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   x2 <- runif(n*r,min=0,max=1)
   Q <- matrix(x2,nrow=n,ncol=r)
 
-  
   a<-rep(1/n,n)
   a<-matrix(a)
   a<-t(a)
@@ -88,11 +86,9 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
   l0 <- 0
   X0 <- matrix(1,m,n)
   print(paste0('begin'))
-  #_____________________________________________________
   #circulate
   while((k < nIter) & (error > error_threshold))
   {
-    #print(paste0('The counts is'))
     #print(k)
     data=as.matrix(data)
     t1=2*W%*%t(H)%*%t(a)%*%a%*%H-2*t(data_bulk)%*%a%*%H
@@ -100,76 +96,61 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
     t2=2*t(a)%*%a%*%H%*%t(W)%*%W-2*t(a)%*%data_bulk%*%W
     l2=(-2)*t(data)%*%W+2*H%*%t(W)%*%W+2*lambda2*sc%*%H+lambda3*t2-Q
     
+    # update the P、Q
     P <- P+bc*(-W)
     P[P < 0] <- 0
     Q <- Q+bc*(-H)
     Q[Q < 0] <- 0
     
+    # update the W、H
     W <- W-bc*l1
     W[W < 0] <- 0
     H <- H-bc*l2
     H[H < 0] <- 0
-    
     #bc<-0.98*bc
-
     #print(paste0('W H is renewed'))
     list <- list(W,H,W%*%t(H))
 
-    #______________
     #compute object function
     x1=data-(W%*%t(H))
     b1=norm(x1,type = "F")^2
-    #print(b1)
-    
     x2=sum(diag(t(W)%*%sg%*%W))
     b2=lambda1*x2
-    #print(b2)
-    
     x3=sum(diag(t(H)%*%sc%*%H))
     b3=lambda2*x3
-    #print(b3)
-    
     x4=(a%*%H%*%t(W))-data_bulk
     b4=lambda3*(norm(x4,type = "2")^2)
-    #print(b4)
-    
     l= b1+b2+b3+b4
-    print(paste0('L='))
+    #print(paste0('L='))
     #print(l)
     
-    
-    #__________________________
     #bounce condition——error<err
     if(l0<l)
     {
-      flag <- 1#increase
+      flag <- 1   #increase
     }
     else
     {
-      flag <- -1#decrease
+      flag <- -1   #decrease
     }
     #print(paste0('error is'))
-    
-    
     c1=norm(X0-list[[3]],type = "F")
     c2=norm(X0,type = "F")
     error <- c1/c2
     #print(error)
     #print(flag)
-    
     k<-k+1
     l0=b1+b2+b3+b4
     X0 <- list[[3]]
   }
   print(paste0('Imputation is finished'))
 
-  #____________________________
   #replace only non-zero values
   data_Y <- list[[3]]
   mean<-sort(data_Y)[m*n*0.1]
-  #data_Y[data_Y < max(mean,0)] <- 0
   data_Y[data_Y < mean] <- 0
   data_Y[data_Y < 0] <- 0
+  
   for(i in 1:m)
   {
     for(j in 1:n)
@@ -192,9 +173,14 @@ scINRB <- function(data,data_bulk,parameter,r,bc = 1e-7,nIter = 2000,error_thres
         K[i,j]<-1
       }
   }
+    
   data_impute <- data*K
+    
   list[[3]] <- data_impute
+    
   time <- f(time1)
+    
   print(time)
+    
   return(list)
 }
