@@ -27,6 +27,7 @@ RMSE <- c(0,0,0,0,0)
 min_RMSE_AVE <- Inf  # Initialize with a large value
 best_r <- 0  # Initialize with 0
 
+#####Calculate the RMSE mean of cross-validation for each r#####
 for(r in c(10,50,100,300,500)){
   
   #####Calculate RMSE under this parameter#####
@@ -48,8 +49,6 @@ for(r in c(10,50,100,300,500)){
     min_RMSE_AVE <- RMSE_AVE
     best_r <- r
   }
-
 }
-
 # Output the parameter 'r' corresponding to the minimum RMSE_AVE
 cat("Best parameter r:", best_r)
