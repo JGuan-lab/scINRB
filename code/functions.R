@@ -7,7 +7,7 @@ f <- function(start_time) {
   format(.POSIXct(dt,tz="GMT"), "%H:%M:%S")
 }
 
-#####Calculate sg\sc#####
+#####Calculate sg\sc for scINRB#####
 SM <- function(data)
 {
   m <- nrow(data)
@@ -20,102 +20,107 @@ SM <- function(data)
   
 }
 
-
-# K-nearest neighbor smoothing for high-throughput single-cell RNA-Seq data
-# (R implementation.)
-
-# Authors:
-#   Yun Yan <yun.yan@nyumc.org>
-#   Florian Wagner <florian.wagner@nyu.edu>
-# Copyright (c) 2017, 2018 New York University
-
-suppressPackageStartupMessages(library(Matrix))
-suppressPackageStartupMessages(library(rsvd))
-
-randomized_pca <- function(tmat, d, seed){
-  # @param tmat A non-negative matrix with samples by features
-  # @return A matrix with features by samples projected on PCA space
-  set.seed(seed)
-  #rsvd_obj <- rsvd(scale(tmat, center = TRUE, scale = FALSE), k=d)
-  #rsvd_obj$u %*% diag(rsvd_obj$d)
-  rpca_obj <- rpca(tmat, k=d, center=T, scale=F, retx=T, p=10, q=7)
-  rpca_obj$x
-}
-
-normalization_median <- function(mat){
-  # Median normalization
-  # @param mat A non-negative matrix with genes by samples
-  num_transcripts <- Matrix::colSums(mat)
-  size_factor <- median(num_transcripts, na.rm = T) / num_transcripts
-  t(t(mat) * size_factor)
-}
-
-freeman_tukey_transform <- function(mat){
-  sqrt(mat) + sqrt(mat + 1)
-}
-
-pdist <- function(tmat){
-  # @param tmat A non-negative matrix with samples by features
-  # @reference http://r.789695.n4.nabble.com/dist-function-in-R-is-very-slow-td4738317.html
-  mtm <- Matrix::tcrossprod(tmat)
-  sq <- rowSums(tmat^2)
-  out0 <- outer(sq, sq, "+") - 2 * mtm
-  out0[out0 < 0] <- 0
-  
-  sqrt(out0)
-}
-
-smoother_aggregate_nearest_nb <- function(mat, D, k){
-  # @param mat A matrix in a shape of #genes x #samples.
-  # @param D A predefined distance matrix in a shape of #samples x #samples.
-  # @param k An integer to choose \code{k} nearest samples (self-inclusive) to
-  #  aggregate based on the distance matrix \code{D}. If \code{k} is greater than
-  #  #samples, \code{k} is forced to be #samples to continue aggregation.
-  sapply(seq_len(ncol(mat)), function(cid){
-    nb_cid <- head(order(D[cid, ]), k)
-    closest_mat <- mat[, nb_cid, drop=FALSE]
-    return(Matrix::rowSums(closest_mat))
-  })
-}
-
-knn_smoothing <- function(mat, k, d=10, seed=42){
-  #' KNN-smoothing on UMI-filtered single-cell RNA-seq data
-  #'
-  #' @param mat A numeric matrix with gene names on rows and cell names on columns.
-  #' @param k Number of nearest neighbours to aggregate.
-  #' @param d Number of Principal components.
-  #' @param seed Seed number. (default=42)
-  #' @return A smoothed numeric matrix.
-  #' @examples
-  #' X <- matrix(abs(sin(seq(from=1, to=1000, length.out = 1000))),
-  #' nrow = 25, byrow = T)
-  #' y <- rep(1:4, each=10)
-  #' dim(X)
-  #' colnames(X) <- as.character(paste0("s", seq_len(ncol(X))))
-  #' rownames(X) <- as.character(paste0("g", seq_len(nrow(X))))
-  #' S <- knn_smoother(X, k=5)
-  #' plot(X[1, ], X[3, ], col=factor(y), main="original")
-  #' plot(S[1, ], S[3, ], col=factor(y), main="smoothed")
-  #' @export
-  
-  cname <- colnames(mat)
-  gname <- rownames(mat)
-  
-  num_steps <- ceiling(log2(k + 1))
-  S <- mat
-  for (p in seq(1, num_steps)){
-    k_step <- min(2^p - 1, k)
-    message(paste0('Step ', p, '/', num_steps, ': ',
-                   'Smoothing using k=', k_step))
-    Y <- freeman_tukey_transform(normalization_median(S))
-    if (! is.null(d)) {
-      Y <- t(randomized_pca(t(Y), d=d, seed=seed))
+#####Generate the zero-one matrix required for cross-verification parameters#####
+mm <- function(m,n)
+{
+  x <- gl(5, 0.2*m*n)
+  x <- sample(x,length(x))
+  M <- matrix(x,nrow=m,ncol=n)
+  M1 <- matrix(data=NA, nrow = m, ncol = n)
+  M2 <- matrix(data=NA, nrow = m, ncol = n)
+  M3 <- matrix(data=NA, nrow = m, ncol = n)
+  M4 <- matrix(data=NA, nrow = m, ncol = n)
+  M5 <- matrix(data=NA, nrow = m, ncol = n)
+  m1 <- matrix(data=NA, nrow = m, ncol = n)
+  m2 <- matrix(data=NA, nrow = m, ncol = n)
+  m3 <- matrix(data=NA, nrow = m, ncol = n)
+  m4 <- matrix(data=NA, nrow = m, ncol = n)
+  m5 <- matrix(data=NA, nrow = m, ncol = n)
+  for(i in 1:m)
+  {
+    for(j in 1:n)
+    {
+      if(M[i,j]==1)
+      {
+        M1[i,j]<-0
+        m1[i,j]<-1
+      }
+      else
+      {
+        M1[i,j]<-1
+        m1[i,j]<-0
+      }
     }
-    D <- pdist(t(Y))
-    S <- smoother_aggregate_nearest_nb(mat, D, k_step + 1)
   }
-  if (! is.null(cname)) colnames(S) <- cname
-  if (! is.null(gname)) rownames(S) <- gname
+
+  for(i in 1:m)
+  {
+    for(j in 1:n)
+    {
+      if(M[i,j]==2)
+      {
+        M2[i,j]<-0
+        m2[i,j]<-1
+      }
+      else
+      {
+        M2[i,j]<-1
+        m2[i,j]<-0
+      }
+    }
+  }
+  for(i in 1:m)
+  {
+    for(j in 1:n)
+    {
+      if(M[i,j]==3)
+      {
+        M3[i,j]<-0
+        m3[i,j]<-1
+      }
+      else
+      {
+        M3[i,j]<-1
+        m3[i,j]<-0
+      }
+    }
+  }
+  for(i in 1:m)
+  {
+    for(j in 1:n)
+    {
+      if(M[i,j]==4)
+      {
+        M4[i,j]<-0
+        m4[i,j]<-1
+      }
+      else
+      {
+        M4[i,j]<-1
+        m4[i,j]<-0
+      }
+    }
+  }
+  for(i in 1:m)
+  {
+    for(j in 1:n)
+    {
+      if(M[i,j]==5)
+      {
+        M5[i,j]<-0
+        m5[i,j]<-1
+      }
+      else
+      {
+        M5[i,j]<-1
+        m5[i,j]<-0
+      }
+    }
+  }
+  list1 <- list(M1,M2,M3,M4,M5)
+  list2 <- list(m1,m2,m3,m4,m5)
+  return(list(list1,list2))
   
-  S
 }
+
+
