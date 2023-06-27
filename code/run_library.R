@@ -250,46 +250,9 @@ run_scrabble_sim <- function(change_rate, scale_num){
 }
 
 
-
-######## knn_smoothing ##############
-run_knn_smoothing_sim <- function(change_rate, scale_num){
-  
-  # load the data
-
-  data <- readRDS(file = paste0('data/simulation_data/',
-                                scale_num,
-                                '_',
-                                change_rate,
-                                '%.rds')
-  )
-  
-  
-  
-  path = "imputation_knn_smoothing_data/"
-  
-  dir.create(file.path(path), showWarnings = FALSE)
-  
-  # impute the data using knn_smoothing
-  data_dropout <- as.matrix(data$data_dropout)
-  exdata <- knn_smoothing(data_dropout,k=10)
-  
-  # write the data
-  write.table(exdata,
-              paste0(path, "knn_smoothing_",scale_num,'_',change_rate,"%.csv"),
-              sep=',',
-              row.names = F,
-              col.names = F)
-  
-}
-
-
 #################################################################################################################
 #run true data
 #################################################################################################################
-
-
-
-
 
 ######## scINRB ##############
 
@@ -328,55 +291,8 @@ run_scINRB <- function(data_sc,data_bulk,data_name)
   )
   
 }
-######## bayNorm ##############
-run_bayNorm <- function(data_sc,data_name){
-  
-  
-  # build the folder saving the imputed data using DrImpute
-  path <- "/imputation_true_data/"
-  #dir.create(file.path(path), showWarnings = FALSE)
-  data_sc <- as.matrix(data_sc)
-  
-  data <- SummarizedExperiment::SummarizedExperiment(assays=list(Counts=data_sc))
-  exdata <- bayNorm(
-    Data=data,
-    BETA_vec = NULL,
-    mode_version=TRUE,
-    mean_version = FALSE,S=20
-    ,verbose =FALSE,
-    parallel = TRUE)
-  
-  # write the data
-  write.table(exdata,
-              paste0(path, "bayNorm_",data_name,".csv"),
-              sep=',',
-              row.names = F,
-              col.names = F
-  )
-  
-}
 
-######## knn_smoothing ##############
-run_knn_smoothing <- function(data_sc,data_name){
-  
-  
-  # build the folder saving the imputed data using DrImpute
-  path <- "/imputation_true_data/"
-  #dir.create(file.path(path), showWarnings = FALSE)
-  
-  data_sc <- as.matrix(data_sc)
-  
-  exdata <- knn_smoothing(data_sc,k=10)
-  
-  # write the data
-  write.table(exdata,
-              paste0(path, "knn_smoothing_",data_name,".csv"),
-              sep=',',
-              row.names = F,
-              col.names = F
-  )
-  
-}
+
 ######## DrImpute ##############
 run_drimpute <- function(data_sc,data_name){
   
@@ -533,52 +449,6 @@ run_SAVER <- function(data_sc,data_name)
   # write the data
   write.table(exdata,
               paste0(path, "SAVER_",data_name,".csv"),
-              sep=',',
-              row.names = F,
-              col.names = F
-  )
-  
-  
-}
-
-
-
-run_SAVERX <- function(data_sc,data_name)
-{
-  
-  
-  path <- "/imputation_true_data/"
-  
-  
-  # impute the data using SAVERX
-  #exdata <- saverx(paste0('~/Desktop/真实数据/1/data/processed/cellbench/sc_10x/data_sc.csv'))
-  
-  exdata <- saverx("/Users/kangkangyue/Desktop/真实数据/1/data/混合数据/data_sc.csv")
-  # write the data
-  write.table(exdata,
-              paste0(path, "SAVERX_",data_name,".csv"),
-              sep=',',
-              row.names = F,
-              col.names = F
-  )
-  
-  
-}
-
-
-run_scRecover <- function(data_sc,data_name)
-{
-  
-  
-  path <- "/imputation_true_data/"
-  
-  
-  # impute the data using SAVERX
-  exdata <- scRecover(counts = data_sc, Kcluster = 2, outputDir = paste0(commandArgs(trailingOnly = T)[2],'/'), verbose = FALSE)
-  
-  # write the data
-  write.table(exdata,
-              paste0(path, "scRecover_",data_name,".csv"),
               sep=',',
               row.names = F,
               col.names = F
