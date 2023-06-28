@@ -17,7 +17,7 @@ The datasets analyzed in the paper are available at: https://doi.org/10.5281/zen
     data_bulk: the bulk RNA-seq data.
 ### The parameters used in scINRB:
 
-    #Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
+    Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
     
     parameter: the vector of regularization parameters, the default is (0.001,0.001,1).    
     r: dimensions of low-dimensional matrix, the default is 200. 
