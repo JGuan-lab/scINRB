@@ -1061,3 +1061,146 @@ get_cor_result <- function(methond,change_rate, scale_num){
   
 }
 
+##################### trajectory for HCA ####################################
+
+# prior knowledge to calculate kendall
+ctlevel <- data.frame(ct=c('HSC','MPP','LMPP','CMP','CLP','GMP','MEP',"Bcell","CD4Tcell","CD8Tcell",'NKcell','Mono','Ery'),level=c(1,2,3,3,4,4,4,5,5,5,5,5,5),immunepath=c(1,1,1,0,1,0,0,1,1,1,1,0,0),monopath=c(1,1,1,1,0,1,0,0,0,0,0,1,0),erypath=c(1,1,0,1,0,0,1,0,0,0,0,0,1),stringsAsFactors = F)
+row.names(ctlevel) <- ctlevel[,1]
+ct <- readRDS('C:/Users/JGuan/Desktop/新建文件夹/HCA/cell_celltype_cluster.rds')
+correctorder <- wrongorder <- NULL
+for(pid in c('immunepath','monopath','erypath')) {
+  evct <- ctlevel[ctlevel[,pid]==1,1]
+  pair <- expand.grid(evct,evct)
+  pair[,1] <- as.character(pair[,1])
+  pair[,2] <- as.character(pair[,2])
+  pair <- pair[pair[,1]!=pair[,2],]
+  corid <- which(ctlevel[pair[,1],'level'] < ctlevel[pair[,2],'level'])
+  wroid <- which(ctlevel[pair[,1],'level'] > ctlevel[pair[,2],'level'])
+  correctorder <- c(correctorder,sapply(corid,function(si) paste0(pair[si,],collapse = '_')))
+  wrongorder <- c(wrongorder,sapply(wroid,function(si) paste0(pair[si,],collapse = '_')))
+}
+correctorder <- unique(correctorder)
+wrongorder <- unique(wrongorder)
+
+
+# prior knowledge to calculate overlap
+ct1 <- readRDS('C:/Users/JGuan/Desktop/新建文件夹/HCA/zhy_MantonBM6.rds')
+ct1[is.na(ct1)] = 'unknown'
+
+# calculate overlap
+get_HCA_ov <- function(cds){
+  cds$Celltype = ct1[colnames(cds@reducedDimS)]
+  max_score_df = list()
+  if (length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points) > 0) {
+    for(i in 1:length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points)){
+      print(i)
+      # rm(cds_reduced)
+      tryCatch({cds_reduced <- buildBranchCellDataSet(cds, branch_point=i)},error=function(e) {}) # get branch info
+      if (exists('cds_reduced')) {
+        col_data_df = as.data.frame(pData(cds))
+        max_score_df[[i]] = lapply(1:length(unique(pData(cds_reduced)$Branch)),function(j){
+          state1 = table(pData(cds_reduced)$State[pData(cds_reduced)$Branch == unique(pData(cds_reduced)$Branch)[j]])
+          state1 = state1[state1>=1] ## Aug30,19. change > to >=
+          print(state1)
+          max_score_df1 = sum(col_data_df[!is.na(ctlevel[match(cds$Celltype,ctlevel[,1]),2]),"State"] %in%  names(state1))/sum(!is.na(ctlevel[match(cds$Celltype,ctlevel[,1]),2]))
+          # max_score_df1 = get_max_score(col_data_df, names(state1))
+          # ov1 = sum(col_data_df[!is.na(ctlevel[match(cds$Celltype,ctlevel[,1]),2]),"State"] %in%  names(state1))/sum(!is.na(ctlevel[match(cds$Celltype,ctlevel[,1]),2]))
+        })
+        max_score_df[[i]] = Reduce(rbind,max_score_df[[i]])      
+      }
+    }      
+    if (length(max_score_df) ==0) {
+      c(NA)
+    } else {
+      max_score_df <- max_score_df[!sapply(max_score_df,is.null)]
+      tmp = unlist(lapply(max_score_df,function(x){colMeans(x)}))         ### autoimpute
+      finalres = max_score_df[[which(tmp==max(tmp))]]
+      return(colMeans(finalres))
+    }
+  } else {
+    c(NA)
+  }
+  
+}
+
+# calculate kendall
+scorefunc <- function(cds) {
+  if (length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points) > 0) {
+    sl <- NULL
+    for(i in 1:length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points)){
+      tryCatch({cds_reduced <- buildBranchCellDataSet(cds,branch_point=i)},error=function(e) {})
+      df = data.frame(pData(cds_reduced),stringsAsFactors = F)
+      df <- df[order(df$Pseudotime),]
+      sl <- rbind(sl,sapply(unique(df$Branch),function(ub) {
+        so <- as.character(df[df[,'Branch']==ub,1])
+        soct <- ct[match(so,ct[,1]),3]
+        eid <- expand.grid(1:length(soct),1:length(soct))
+        eid <- eid[eid[,1]<eid[,2],]
+        eid <- sprintf('%s_%s',soct[eid[,1]],soct[eid[,2]])
+        zhy = c(sum(eid %in% correctorder),sum(eid %in% wrongorder))
+        
+        (zhy[1]+zhy[2])/choose(length(soct),2)
+      }))
+    }
+    max(rowMeans(sl))
+  } else {
+    NA
+  }
+}
+
+# plot trajectory
+library(ggplot2)
+library(gridExtra)
+library(RColorBrewer)
+library(reshape2)
+library(ggrepel)
+
+plot_trajectory <- function(cds){
+  
+  cds$Celltype = ct1[colnames(cds@reducedDimS)]
+  # Color setting
+  getPalette = colorRampPalette(brewer.pal(12, "Paired"))
+  colorvec = getPalette(length(unique(ct1)))
+  p1 <- plot_cell_trajectory(cds, cell_size = 0.5, color_by = 'Celltype')  + theme(legend.position = 'bottom')  + scale_color_manual(values=colorvec ) +
+    guides(color = guide_legend(nrow = 3, byrow = TRUE,override.aes = list(size=2,alpha=1))) +
+    theme(legend.spacing.x = unit(0, 'cm'),legend.spacing.y = unit(-0.5, 'cm'))+
+    labs(color='') + ggtitle('Deepimpute') + xlab('Monocle2 Component 1') + ylab('Monocle2 Component 2')
+  # save
+  pdf(paste0('G:/Zhy/',f,'.pdf'),width = 6, height = 6)
+  grid.arrange(p1)
+  dev.off()  
+}
+
+                                    
+get_HCA_cds <- function(expression_matrix){
+  set.seed(12345)
+  
+  cell_metadata <- data.frame(cell=colnames(expression_matrix))
+  row.names(cell_metadata) <- colnames(expression_matrix)
+  gene_annotation <- data.frame(gene_short_name=row.names(expression_matrix))
+  row.names(gene_annotation) <- row.names(expression_matrix)
+  
+  pd <- new("AnnotatedDataFrame", data = cell_metadata)
+  fd <- new("AnnotatedDataFrame", data = gene_annotation)
+  cds <- newCellDataSet(as.matrix(expression_matrix),phenoData = pd, featureData = fd,expressionFamily=uninormal())
+  flag <- 0
+  tryCatch({cds = reduceDimension(cds, method = "DDRTree",norm_method="none",pseudo_expr=0);flag <- 1},warning=function(w){},error=function(e){})
+  
+  if (flag == 0) {
+    cds = reduceDimension(cds, method = "DDRTree",norm_method="none",pseudo_expr=0,auto_param_selection=F)
+  }
+  cds = orderCells(cds)
+  
+  tmp <- as.numeric(as.character(pData(cds)$State))
+  names(tmp) <- colnames(expression_matrix)
+  utmp <- unique(tmp)
+  
+  checkroot <- sapply(utmp,function(ss) {
+    cds = orderCells(cds,root_state=ss)
+    length(cds@auxOrderingData[[cds@dim_reduce_type]]$root_cell)
+  })
+  utmp <- utmp[checkroot > 0]
+  tmp <- utmp[which.min(sapply(utmp,function(scn) mean(ctlevel[match(ct[match(names(tmp)[tmp==scn],ct[,1]),3],ctlevel[,1]),2],na.rm=T)))]
+  cds = orderCells(cds,root_state=tmp) # reorder the cells
+  return(cds)
+}
