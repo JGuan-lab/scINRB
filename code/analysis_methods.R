@@ -1204,3 +1204,265 @@ get_HCA_cds <- function(expression_matrix){
   cds = orderCells(cds,root_state=tmp) # reorder the cells
   return(cds)
 }
+
+
+##################### trajectory for RNAmix_sortseq ####################################
+library(parallel)
+library(igraph)
+library(Seurat)
+suppressMessages(library('monocle'))
+
+prep_traj_order <- function(cds,group){
+  cds$H2228_to_H1975 = NA
+  cds$H2228_to_H1975[group=="0 9 0"] = 0
+  cds$H2228_to_H1975[group=="1 7 1"] = 1
+  cds$H2228_to_H1975[group=="2 5 2"] = 2
+  cds$H2228_to_H1975[group=="3 3 3"] = 3
+  cds$H2228_to_H1975[group=="5 2 2"] = 4
+  cds$H2228_to_H1975[group=="7 1 1"] = 5
+  cds$H2228_to_H1975[group=="9 0 0"] = 6
+  
+  cds$H2228_to_HCC827 = NA
+  cds$H2228_to_HCC827[group=="0 9 0"] = 0
+  cds$H2228_to_HCC827[group=="1 7 1"] = 1
+  cds$H2228_to_HCC827[group=="2 5 2"] = 2
+  cds$H2228_to_HCC827[group=="3 3 3"] = 3
+  cds$H2228_to_HCC827[group=="2 2 5"] = 4
+  cds$H2228_to_HCC827[group=="1 1 7"] = 5
+  cds$H2228_to_HCC827[group=="0 0 9"] = 6
+  
+  cds$H1975_to_HCC827 = NA
+  cds$H1975_to_HCC827[group=="9 0 0"] = 0
+  cds$H1975_to_HCC827[group=="7 1 1"] = 1
+  cds$H1975_to_HCC827[group=="5 2 2"] = 2
+  cds$H1975_to_HCC827[group=="3 3 3"] = 3
+  cds$H1975_to_HCC827[group=="2 2 5"] = 4
+  cds$H1975_to_HCC827[group=="1 1 7"] = 5
+  cds$H1975_to_HCC827[group=="0 0 9"] = 6
+  return(cds)
+}
+
+prep_RNA_traj_order <- function(cds,group){
+  cds$H2228_to_H1975 = NA
+  cds$H2228_to_H1975[cds$group=="1 0 0"] = 0
+  cds$H2228_to_H1975[cds$group=="0.68 0.16 0.16"] = 1
+  cds$H2228_to_H1975[cds$group=="0.33 0.33 0.33"] = 2
+  cds$H2228_to_H1975[cds$group=="0.16 0.68 0.16"] = 3
+  cds$H2228_to_H1975[cds$group=="0 1 0"] = 4
+  
+  cds$H2228_to_HCC827 = NA
+  cds$H2228_to_HCC827[cds$group=="1 0 0"] = 0
+  cds$H2228_to_HCC827[cds$group=="0.68 0.16 0.16"] = 1
+  cds$H2228_to_HCC827[cds$group=="0.33 0.33 0.33"] = 2
+  cds$H2228_to_HCC827[cds$group=="0.16 0.16 0.68"] = 3
+  cds$H2228_to_HCC827[cds$group=="0 0 1"] = 4
+  
+  cds$H1975_to_HCC827 = NA
+  cds$H1975_to_HCC827[cds$group=="0 1 0"] = 0
+  cds$H1975_to_HCC827[cds$group=="0.16 0.68 0.16"] = 1
+  cds$H1975_to_HCC827[cds$group=="0.33 0.33 0.33"] = 2
+  cds$H1975_to_HCC827[cds$group=="0.16 0.16 0.68"] = 3
+  cds$H1975_to_HCC827[cds$group=="0 0 1"] = 4
+  return(cds)
+}
+
+prep_traj_wrapper <- function(cds,group){
+  if ('0 0 9' %in% cds$group){
+    return(prep_traj_order(cds,group))
+  } else {
+    return(prep_RNA_traj_order(cds,group))
+  }
+}
+
+get_RNAmix_cds <- function(expression_matrix){
+  set.seed(12345)
+  # preproccess
+  # Change the RNAmix colnames
+  cn <- gsub('\\.',':',colnames(expression_matrix))
+  cn <- gsub('0:16','0.16',cn)
+  cn <- gsub('0:68','0.68',cn)
+  cn <- gsub('0:33','0.33',cn)
+  colnames(expression_matrix) = cn
+  
+  prefix = unique(sub(':.*','',colnames(expression_matrix)))  
+  if (FALSE){
+    raw = readRDS(paste0('./data/processed/cellbench/',sub('.rds','',f),'/genebycell.rds'))
+    colnames(expression_matrix) = colnames(raw)
+    # cn <- sapply(cn,function(i) {
+    #   paste0(round(as.numeric(strsplit(i,'_')[[1]]) * 9),collapse = '_')
+    # },USE.NAMES = F)
+    cn = sapply(colnames(expression_matrix), function(i) strsplit(i,':')[[1]][2])
+  } else {
+    cn = sapply(colnames(expression_matrix), function(i) strsplit(i,':')[[1]][2])
+    cn <- sapply(cn,function(i) {
+      j <- as.numeric(strsplit(i,'_')[[1]])
+      paste0(j,collapse='_')
+    },USE.NAMES = F)
+  } 
+  
+  group <- sub('.*:','',colnames(expression_matrix))
+  colnames(expression_matrix) <- paste0(colnames(expression_matrix),'_',1:ncol(expression_matrix))
+  print(str(group))
+  prop <- t(sapply(group,function(i) {
+    as.numeric(strsplit(sub('.*:','',i),'_')[[1]])
+  }))
+  cell_metadata <- data.frame(cell=colnames(expression_matrix),p1=prop[,1],p2=prop[,2],p3=prop[,3])
+  row.names(cell_metadata) <- colnames(expression_matrix)
+  gene_annotation <- data.frame(gene_short_name=row.names(expression_matrix))
+  row.names(gene_annotation) <- row.names(expression_matrix)
+  
+  
+  pd <- new("AnnotatedDataFrame", data = cell_metadata)
+  fd <- new("AnnotatedDataFrame", data = gene_annotation)
+  cds <- newCellDataSet(as.matrix(expression_matrix),phenoData = pd, featureData = fd,expressionFamily=uninormal())
+  
+  cds$group = gsub('_',' ',group)
+  cds <- prep_traj_wrapper(cds,cds$group)
+  flag <- 0
+  tryCatch({cds = reduceDimension(cds, method = "DDRTree",norm_method="none",pseudo_expr=0);flag <- 1},warning=function(w){},error=function(e){})
+  if (flag == 0) {
+    cds = reduceDimension(cds, method = "DDRTree",norm_method="none",pseudo_expr=0,auto_param_selection=F)
+  }
+  
+  cds = orderCells(cds)
+  tmp = table(pData(cds)$State[pData(cds)$group=='0_1_0'])  # specify H2228 as root state.
+  
+  tmp = tmp[order(tmp,decreasing = T)]
+  cds = orderCells(cds,root_state=names(tmp)[1],num_paths=3) # reorder the cells
+  return(cds)
+}
+
+
+get_max_score = function(col_anno, states){
+  col_st = col_anno[col_anno$State %in% states,]
+  # cor1 = cor(col_st$Pseudotime, col_st$H2228_to_H1975, use = "pairwise.complete.obs",method='spearman')
+  # cor2 = cor(col_st$Pseudotime, col_st$H2228_to_HCC827, use = "pairwise.complete.obs",method='spearman')
+  # cor3 = cor(col_st$Pseudotime, col_st$H1975_to_HCC827, use = "pairwise.complete.obs",method='spearman')
+  ov1 = sum(col_anno[!is.na(col_anno$H2228_to_H1975),"State"] %in% states)/sum(!is.na(col_anno$H2228_to_H1975))
+  ov2 = sum(col_anno[!is.na(col_anno$H2228_to_HCC827),"State"] %in% states)/sum(!is.na(col_anno$H2228_to_HCC827))
+  ov3 = sum(col_anno[!is.na(col_anno$H1975_to_HCC827),"State"] %in% states)/sum(!is.na(col_anno$H1975_to_HCC827))
+  #sp1 = 1-sum(col_anno[is.na(col_anno$H2228_to_H1975),"State"] %in% states)/sum(is.na(col_anno$H2228_to_H1975))
+  #sp2 = 1-sum(col_anno[is.na(col_anno$H2228_to_HCC827),"State"] %in% states)/sum(is.na(col_anno$H2228_to_HCC827))
+  #sp3 = 1-sum(col_anno[is.na(col_anno$H1975_to_HCC827),"State"] %in% states)/sum(is.na(col_anno$H1975_to_HCC827))
+  #res_df = data.frame(corr=abs(c(cor1,cor2,cor3)),overlap=c(ov1,ov2,ov3),sp=c(sp1,sp2,sp3))
+  # res_df = data.frame(corr=abs(c(cor1,cor2,cor3)),overlap=c(ov1,ov2,ov3))
+  res_df = data.frame(overlap=c(ov1,ov2,ov3))
+  
+  res_df = res_df[order(res_df,decreasing = T),]
+  return(res_df[1])
+}
+# calculate overlap
+get_RNAmix_ov <- function(cds){
+  max_score_df = list()
+  if (length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points) > 0) {
+    for(i in 1:length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points)){
+      print(i)
+      # rm(cds_reduced)
+      tryCatch({cds_reduced <- buildBranchCellDataSet(cds, branch_point=i)},error=function(e) {}) # get branch info
+      if (exists('cds_reduced')) {
+        col_data_df = as.data.frame(pData(cds))
+        max_score_df[[i]] = lapply(1:length(unique(pData(cds_reduced)$Branch)),function(j){
+          state1 = table(pData(cds_reduced)$State[pData(cds_reduced)$Branch == unique(pData(cds_reduced)$Branch)[j]])
+          state1 = state1[state1>=1] ## Aug30,19. change > to >=
+          print(state1)
+          max_score_df1 = get_max_score(col_data_df, names(state1))
+        })
+        max_score_df[[i]] = Reduce(rbind,max_score_df[[i]])      
+      }
+    }      
+    if (length(max_score_df) ==0) {
+      c(NA)
+    } else {
+      max_score_df <- max_score_df[!sapply(max_score_df,is.null)]
+      tmp = unlist(lapply(max_score_df,function(x){colMeans(x)[1]}))         ### autoimpute
+      finalres = max_score_df[[which(tmp==max(tmp))]]
+      return(colMeans(finalres))
+    }
+  } else {
+    c(NA)
+  }
+  
+}
+
+
+kendall_func <- function(x,y,tot=NULL){
+  if(length(x)>1&length(y)>1){
+    P   <- 0
+    Q   <- 0
+    # P是一致的，Q是不一致的
+    for(i in 1:(length(x)-1)){
+      for(j in (i+1):length(x)){
+        if(sign(x[i]-x[j])*sign(y[i]-y[j])<0){
+          Q = Q + 1
+        }
+        
+        if(sign(x[i]-x[j])*sign(y[i]-y[j])>0){
+          P = P + 1
+        }
+        
+      }
+    }
+    if(is.null(tot)){tot=length(x)}
+    out <- (P-Q)/choose(tot,2) # option 1, slingshot, max
+  }else{
+    out <- 0
+  }
+  
+  return(out)
+}
+
+# calculate kendall
+score_kendall <- function(cds) {
+  if (length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points) > 0) {
+    sl <- NULL
+    s1 <- NULL
+    for(i in 1:length(cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points)){
+      tryCatch({cds_reduced <- buildBranchCellDataSet(cds,branch_point=i)},error=function(e) {})
+      df = data.frame(pData(cds_reduced),stringsAsFactors = F)
+      df <- df[order(df$Pseudotime),]
+      sl <- rbind(sl,sapply(unique(df$Branch),function(ub) {
+        
+        so <- as.character(df[df[,'Branch']==ub,1])
+        # soct <- ct[match(so,ct[,1]),3]
+        x1 = as.numeric(na.omit(cds$H2228_to_H1975[match(so,cds$cell)]))
+        x2 = as.numeric(na.omit(cds$H2228_to_HCC827[match(so,cds$cell)]))
+        x3 = as.numeric(na.omit(cds$H1975_to_HCC827[match(so,cds$cell)]))
+        z<-c()
+        # The first column loops through each element in sequence, 
+        # The second column loops through each element by number of lengths
+        for (pid in list(x1,x2,x3)){
+          y = matrix(1:length(pid))
+          z <- rbind( kendall_func(pid,y), z )
+        } 
+        z <- max(z)
+        # eid <- expand.grid(1:length(soct),1:length(soct))
+        # eid <- eid[eid[,1]<eid[,2],]
+        # eid <- sprintf('%s_%s',soct[eid[,1]],soct[eid[,2]])
+        # c(sum(eid %in% correctorder),sum(eid %in% wrongorder))
+        
+      }))
+    }
+    s1 = mean(sl[which.max(rowMeans(sl)),])
+  } else {
+    NA
+  }
+}
+
+# plot_trajectory
+plot_RNAmix_trajectory <- function(cds){
+  
+  p1 <- plot_cell_trajectory(cds, cell_size = 0.5, color_by = 'Pseudotime')  + theme(legend.position = 'bottom') +
+    scale_color_steps(low = "white", high = "blue")+
+    # guides(color = guide_legend(nrow = 3, byrow = TRUE,override.aes = list(size=2,alpha=1))) +
+    # theme(legend.spacing.x = unit(0, 'cm'),legend.spacing.y = unit(-0.5, 'cm'))+
+    ggtitle('no_imp') + xlab('Monocle2 Component 1') + ylab('Monocle2 Component 2')
+  
+  # save
+  pdf(paste0('G:/zhy/XX.pdf'),width = 6, height = 6)
+  grid.arrange(p1)
+  dev.off()  
+}
+
+
+
+                               
