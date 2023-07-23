@@ -403,7 +403,7 @@ get_cor_imputed_data <- function(change_rate, scale_num){
   
   
   
-  #相关矩阵转向量
+  #Correlation matrix conversion into vector
   vector_true<- as.vector(unlist(data_true))
   vector_dropout <- as.vector(unlist(data_dropout))
   vector_scINRB <- as.vector(unlist(data_scINRB))
@@ -736,26 +736,7 @@ get_simulation_data <- function(change_rate, scale_num){
                                         header = FALSE, sep=","
   ))
   
-  
-  
-  # load imputed data from netNMFsc_H
-  
-  # data_netNMFsc_H = as.matrix(read.table( file = paste0("imputation_netNMFsc_changerate_data/H_",
-  #                                                       scale_num, "_",
-  #                                                       change_rate,
-  #                                                       "%.csv") ,
-  #                                         header = FALSE, sep=","
-  # ))
-  # 
-  # data_netNMFsc_W = as.matrix(read.table( file = paste0("imputation_netNMFsc_changerate_data/W_",
-  #                                                       scale_num, "_",
-  #                                                       change_rate,
-  #                                                       "%.csv") ,
-  #                                         header = FALSE, sep=","
-  # ))
-  # 
-  # data_netNMFsc <- data_netNMFsc_W%*%data_netNMFsc_H
-  # 
+
   imputation_data_list <- list()
   
   imputation_data_list[[1]] <- data_true
