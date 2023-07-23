@@ -1,25 +1,24 @@
 Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
 library(Rcpp)
-Rcpp::sourceCpp("/Users/kangkangyue/Desktop/scINRB//julei.cpp")
-source('/Users/kangkangyue/Desktop/scINRB//analysis_methods.R')
+Rcpp::sourceCpp("../scINRB/julei.cpp")
+source('../scINRB/analysis_methods.R')
 library(devtools)
 library(fpc)
 library(mclust)
 library(ngram)
 
 #########Read the simulation data######
-data <- readRDS("/Users/kangkangyue/Desktop/scINRB/data/simulation_data/3_60%.rds")
+data <- readRDS("../scINRB/data/simulation_data/3_60%.rds")
 data_dropout <- as.matrix(data$data_dropout)
 data_true <- as.matrix(data$data_true)
 data_bulk <- as.matrix(data$data_bulk)
 data_label <- as.matrix(data[["group"]])
-impute_data <- read.csv("/Users/kangkangyue/Desktop/scINRB/imputation_knn_smoothing_data/knn_smoothing_1_60%.csv", header=FALSE)
+impute_data <- read.csv("../scINRB/imputation_knn_smoothing_data/knn_smoothing_1_60%.csv", header=FALSE)
 impute_data <- as.matrix(impute_data)
 
 ########Read the true data#######
-# data_label <- as.matrix(read.csv("/Users/kangkangyue/Desktop/scINRB/data/five_encode/data_label.csv",row.names=1))
-# impute_data <-  read.csv("/Users/kangkangyue/Desktop/论文/kangyue/LPLS9.28/true_data/knn_smoothing/knn_smoothing_混合数据.csv",row.names=1)
-# impute_data <- as.matrix(impute_data)
+# data_label <- as.matrix(read.csv("../scINRB/data/five_encode/data_label.csv",row.names=1))
+# impute_data <- as.matrix(read.csv("../data.csv",row.names=1))
 ######### 100 averages kmeans clustering#############
 H<-t(impute_data)
 realcluster <- data_label
@@ -43,7 +42,7 @@ print(ari_ave)
 print(sc_ave)
 print(nmi_ave)
 
-#write.csv(cluster_list,"/Users/kangkangyue/Desktop/scINRB/imputation_scINDR_data/cluster_3_60%.csv")
+#write.csv(cluster_list,"../scINRB/imputation_scINDR_data/cluster_3_60%.csv")
 
 ######### 100 averages of tsne clustering#############
 tsne.coords <- Rtsne(t(impute_data),pca=FALSE,perplexity = 30,theta=0.5,check_duplicates = F)$Y
@@ -74,12 +73,12 @@ print(nmi_ave)
 
 
 ######## simulation data kemans clustering
-source('/Users/kangkangyue/Desktop/scINRB/analysis_methods.R')
-path="/Users/kangkangyue/Desktop/scINRB" 
+source('../scINRB/analysis_methods.R')
+path="../scINRB" 
 setwd(path)  
 method="deepimpute"
 
-for(scale_num in c(2,3,5,6)){
+for(scale_num in c(1,2,3,4,5)){
   print(scale_num)
   for(change_rate in c(60,50,40,30,20)){
     
@@ -97,7 +96,7 @@ library(ggplot2)
 library(devtools)
 library(mclust)
 library(fpc)
-path="/Users/kangkangyue/Desktop/scINRB" 
+path="../scINRB" 
 setwd(path)  
 source('analysis_methods.R')
 method="deepimpute"
@@ -127,7 +126,7 @@ library(lattice)
 library(aplot)
 library(tidyr)
 library(Metrics)
-path="/Users/kangkangyue/Desktop/scINRB" 
+path="../scINRB" 
 setwd(path)  
 source('methods.R')
 source('analysis_methods.R')
