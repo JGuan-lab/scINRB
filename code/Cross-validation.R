@@ -65,7 +65,9 @@ M0<-result[[1]]
 m0<-result[[2]]
 RMSE <- c(0,0,0,0,0)
 min_RMSE_AVE <- Inf  # Initialize with a large value
-best_r <- 0  # Initialize with 0
+best_p1 <- 0  # Initialize with 0
+best_p2 <- 0
+best_p3 <- 0
 
 #####Calculate the RMSE mean of cross-validation for each r#####
 for(p1 in c(0.001,0.1,10)){
