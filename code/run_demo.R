@@ -1,6 +1,6 @@
 #######Read the data#############
 #simulation data
-path="/Users/kangkangyue/Desktop/scINRB/data/simulation_data" 
+path="../scINRB/data/simulation_data" 
 setwd(path)  
 data <- readRDS("4_20%.rds")
 data_sc <- as.matrix(data$data_dropout)
@@ -10,8 +10,6 @@ data_bulk <- as.matrix(data$data_bulk)
 # data_sc <- read.csv("data_sc.csv",row.names=1)
 # data_bulk <- read.csv("data_bulk.csv",row.names=1)
 ###########
-path="/Users/kangkangyue/Desktop/scINRB" 
-setwd(path)  
 source('scINRB.R')
 source('functions.R')
 library(MASS)
