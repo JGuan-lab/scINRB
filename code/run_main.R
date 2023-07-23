@@ -6,7 +6,7 @@ library(scImpute)
 library(SCRABBLE)
 library(DrImpute)
 library(viper)
-path="/Users/kangkangyue/Desktop/scINRB" 
+path="../scINRB" 
 setwd(path)  
 source("run_library.R")
 source('scINRB.R')
@@ -79,9 +79,9 @@ for(change_rate in c(20,30,40,50,60) ){
 
 # The following code is used to impute true data using different methods.
 
-data_sc <- read.csv("/Users/kangkangyue/Desktop/scINRB/data/true_data/five_encode/data_sc.csv",row.names=1)
-data_bulk <- read.csv("/Users/kangkangyue/Desktop/scINRB/data/true_data/five_encode/data_bulk.csv",row.names=1)
-data_label <- read.csv("/Users/kangkangyue/Desktop/scINRB/data/true_data/five_encode/data_label.csv",row.names=1)
+data_sc <- read.csv("../scINRB/data/true_data/five_encode/data_sc.csv",row.names=1)
+data_bulk <- read.csv("../scINRB/data/true_data/five_encode/data_bulk.csv",row.names=1)
+data_label <- read.csv("../scINRB/data/true_data/five_encode/data_label.csv",row.names=1)
 data_name <- 'five_encode'
 
 
