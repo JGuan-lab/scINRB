@@ -25,12 +25,8 @@ parameter: the vector of regularization parameters, the default is (0.001,0.001,
 r: dimensions of low-dimensional matrix, the default is 200. 
 Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
 
-    path="/../simulation_data_changerate" 
-    setwd(path)  
-    source('scINRB.R')
-    source('fuctions.R')
     library(MASS)
-    data <- readRDS("3_20%.rds")
+    data <- readRDS("simulation_data_changerate/3_20%.rds")
     data_dropout <- as.matrix(data$data_dropout)
     data_true <- as.matrix(data$data_true)
     data_bulk <- as.matrix(data$data_bulk)
@@ -39,9 +35,6 @@ Parameters (including three regularization parameters and the number of factors 
     
 ### 3.3 Run scINRB:
     #run_demo.R
-    setwd(path)
-    source('scINRB.R')
-    source('functions.R')
     data_sc <- read.csv("data/data_sc.csv",row.names=1)
     data_bulk <- read.csv("data/data_bulk.csv",row.names=1)
     parameter <- c(0.001,0.001,1) 
