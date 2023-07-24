@@ -1,3 +1,23 @@
+#####Data preprocessing#####
+
+preprocess <- function(data_sc0,data_bulk0)
+{
+  
+  myvars1 <- rownames(data_sc0) %in% rownames(data_bulk0)
+  
+  myvars2 <- rownames(data_bulk0) %in% rownames(data_sc0)
+  
+  data_sc1 <- data_sc0[myvars1,]
+  
+  data_bulk1 <- as.matrix(data_bulk0[myvars2,1])
+  
+  return(list(data_sc1,data_bulk1))
+  
+  
+}
+
+
+
 #####Record Runtime#####
 f <- function(start_time) {
   start_time <- as.POSIXct(start_time)
