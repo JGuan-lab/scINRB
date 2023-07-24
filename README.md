@@ -16,16 +16,20 @@ The datasets analyzed in the paper are available at: https://doi.org/10.5281/zen
     source('scINRB.R')
     source('functions.R')
 ## 3.Quick start
+
+
 ### 3.1 Prepare data:
 The input data includes the input dropout scRNA-seq data and the bulk RNA-seq data.
 
+    data <- readRDS("data/simulation_data/4_20%.rds")
+    data_sc0 <- as.matrix(data$data_dropout)
+    data_bulk0 <- as.matrix(data$data_bulk)
     result <- preprocess(data_sc0,data_bulk0)
     data_sc <- result[[1]]
     data_bulk <- result[[2]]
 
 ### 3.2 The parameters used in scINRB:
-parameter: the vector of regularization parameters, the default is (0.001,0.001,1).    
-r: dimensions of low-dimensional matrix, the default is 200. 
+The vector default value of the regularized parameter is (0.001,0.001,1)；The default value of the dimension of the low-dimensional matrix is 200.  
 Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
 
     cross_validation(data_sc,data_bulk)
