@@ -17,7 +17,8 @@ The datasets analyzed in the paper are available at: https://doi.org/10.5281/zen
     source('functions.R')
 ## 3.Quick start
 ### 3.1 Prepare data:
-The input data includes the input dropout scRNA-seq data and the bulk RNA-seq data
+The input data includes the input dropout scRNA-seq data and the bulk RNA-seq data.
+
     result <- preprocess(data_sc0,data_bulk0)
     data_sc <- result[[1]]
     data_bulk <- result[[2]]
