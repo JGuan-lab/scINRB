@@ -29,8 +29,7 @@ The input data includes the input dropout scRNA-seq data and the bulk RNA-seq da
     data_bulk <- result[[2]]
 
 ### 3.2 The parameters used in scINRB:
-The vector default value of the regularized parameter is (0.001,0.001,1)；The default value of the dimension of the low-dimensional matrix is 200.  
-Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
+The vector default value of the regularized parameter is (0.001,0.001,1)；The default value of the dimension of the low-dimensional matrix is 200.Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
 
     cross_validation(data_sc,data_bulk)
     
