@@ -13,33 +13,27 @@ The datasets analyzed in the paper are available at: https://doi.org/10.5281/zen
     R (>= 4.0.4) 
 ### Requirements:
     library(MASS)
-    source('scINRB.R')#“预装“函数
-    source('functions.R')#“预装“函数
+    source('scINRB.R')
+    source('functions.R')
 ## 3.Quick start
 ### 3.1 Prepare data:
 The input data includes the input dropout scRNA-seq data and the bulk RNA-seq data
-    ...
+    result <- preprocess(data_sc0,data_bulk0)
+    data_sc <- result[[1]]
+    data_bulk <- result[[2]]
 
 ### 3.2 The parameters used in scINRB:
 parameter: the vector of regularization parameters, the default is (0.001,0.001,1).    
 r: dimensions of low-dimensional matrix, the default is 200. 
 Parameters (including three regularization parameters and the number of factors r) can be selected by cross-validation.
 
-    library(MASS)
-    data <- readRDS("simulation_data_changerate/3_20%.rds")
-    data_dropout <- as.matrix(data$data_dropout)
-    data_true <- as.matrix(data$data_true)
-    data_bulk <- as.matrix(data$data_bulk)
-    data_label <- as.matrix(data[["group"]])
-    cross_validation(data_dropout,data_bulk)
+    cross_validation(data_sc,data_bulk)
     
 ### 3.3 Run scINRB:
     #run_demo.R
-    data_sc <- read.csv("data/data_sc.csv",row.names=1)
-    data_bulk <- read.csv("data/data_bulk.csv",row.names=1)
     parameter <- c(0.001,0.001,1) 
     r <- 200
-    result <- scINRB(data,data_bulk,parameter,r)
+    result <- scINRB(data_sc,data_bulk,parameter,r)
     write.csv(result[[3]], file="scINRB_matrix.csv")
 
  
