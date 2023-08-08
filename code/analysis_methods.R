@@ -1047,7 +1047,7 @@ get_cor_result <- function(methond,change_rate, scale_num){
 # prior knowledge to calculate kendall
 ctlevel <- data.frame(ct=c('HSC','MPP','LMPP','CMP','CLP','GMP','MEP',"Bcell","CD4Tcell","CD8Tcell",'NKcell','Mono','Ery'),level=c(1,2,3,3,4,4,4,5,5,5,5,5,5),immunepath=c(1,1,1,0,1,0,0,1,1,1,1,0,0),monopath=c(1,1,1,1,0,1,0,0,0,0,0,1,0),erypath=c(1,1,0,1,0,0,1,0,0,0,0,0,1),stringsAsFactors = F)
 row.names(ctlevel) <- ctlevel[,1]
-ct <- readRDS('C:/Users/JGuan/Desktop/新建文件夹/HCA/cell_celltype_cluster.rds')
+ct <- readRDS('cell_celltype_cluster.rds')
 correctorder <- wrongorder <- NULL
 for(pid in c('immunepath','monopath','erypath')) {
   evct <- ctlevel[ctlevel[,pid]==1,1]
@@ -1065,7 +1065,7 @@ wrongorder <- unique(wrongorder)
 
 
 # prior knowledge to calculate overlap
-ct1 <- readRDS('C:/Users/JGuan/Desktop/新建文件夹/HCA/zhy_MantonBM6.rds')
+ct1 <- readRDS('MantonBM6.rds')
 ct1[is.na(ct1)] = 'unknown'
 
 # calculate overlap
@@ -1370,7 +1370,6 @@ kendall_func <- function(x,y,tot=NULL){
   if(length(x)>1&length(y)>1){
     P   <- 0
     Q   <- 0
-    # P是一致的，Q是不一致的
     for(i in 1:(length(x)-1)){
       for(j in (i+1):length(x)){
         if(sign(x[i]-x[j])*sign(y[i]-y[j])<0){
@@ -1439,7 +1438,7 @@ plot_RNAmix_trajectory <- function(cds){
     ggtitle('no_imp') + xlab('Monocle2 Component 1') + ylab('Monocle2 Component 2')
   
   # save
-  pdf(paste0('G:/zhy/XX.pdf'),width = 6, height = 6)
+  pdf(paste0('XX.pdf'),width = 6, height = 6)
   grid.arrange(p1)
   dev.off()  
 }
