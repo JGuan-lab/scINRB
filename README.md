@@ -5,7 +5,7 @@
 
 scINRB, a single-cell gene expression imputation method with network regularization and bulk RNA-seq data, adopts network-regularized non-negative matrix factorization to decompose single-cell gene expression matrix into low-dimensional gene-factor and sample-factor matrices, ensuring that the imputed data maintains the original cell-cell and gene-gene similarities and approaches the gene average expression calculated from bulk RNA-seq data.
 
-The datasets analyzed in the paper are available at: https://doi.org/10.5281/zenodo.7501990
+The datasets analyzed in the paper are available at: https://zenodo.org/record/8224512
 
 ## 2. Installation
 
