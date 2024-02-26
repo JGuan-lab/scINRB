@@ -38,7 +38,7 @@ cross_validation <- function(data_dropout,data_bulk)
       M <- M0[[value]]
       m <- m0[[value]]
       parameter <- c(0,0,0)
-      newdata <- impute(M,data_dropout,data_bulk,parameter,r)
+      newdata <- scINRB(M*data_dropout,data_bulk,parameter,r)
       x1 <- m*(data_dropout-newdata)
       x2 <- m*(data_true-newdata)
       n <- nrow(data_dropout)*ncol(data_dropout)*0.2
@@ -82,7 +82,7 @@ cross_validation <- function(data_dropout,data_bulk)
         M <- M0[[value]]
         m <- m0[[value]]
         parameter <- c(p1,p2,p3)
-        newdata <- impute(M,data_dropout,data_bulk,parameter,best_r)
+        newdata <- scINRB(M*data_dropout,data_bulk,parameter,best_r)
         x1 <- m*(data_dropout-newdata)
         x2 <- m*(data_true-newdata)
         n <- nrow(data_dropout)*ncol(data_dropout)*0.2
