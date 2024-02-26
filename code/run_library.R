@@ -60,7 +60,7 @@ run_scINRB_sim <- function(change_rate, scale_num)
   data_dropout <- as.matrix(data$data_dropout)
   data_bulk <- as.matrix(data$data_bulk)
   parameter <- c(0.001,0.001,1)
-  r <- 200
+  r <- 10
   exdata <- scINRB(data_dropout,data_bulk,parameter,r)
   
   # write the data
