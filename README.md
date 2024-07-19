@@ -7,6 +7,9 @@ scINRB, a single-cell gene expression imputation method with network regularizat
 
 The datasets analyzed in the paper are available at: https://zenodo.org/record/8224512
 
+scINRB corresponds to the following paper:
+Yue Kang, Hongyu Zhang, Jinting Guan, scINRB: single-cell gene expression imputation with network regularization and bulk RNA-seq data, Briefings in Bioinformatics, Volume 25, Issue 3, May 2024, bbae148, https://doi.org/10.1093/bib/bbae148
+
 ## 2. Installation
 
 ### Depends:
