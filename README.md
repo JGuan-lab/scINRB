@@ -1,6 +1,5 @@
 # scINRB: single-cell gene expression imputation with network regularization and bulk RNA-seq data
 
-建模：针对基因调控网络构建中基因表达信息缺失及不准确等复杂动态系统建模难题，提出了复杂耦合关联系统的建模方法，建立了融合数据和知识的复杂动态网络系统模型，提升了基因调控网络动态系统模型的准确性和鲁棒性。
 
 ## 1. Introduction
 
